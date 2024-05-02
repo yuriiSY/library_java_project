@@ -21,7 +21,7 @@ public class AuthorServiceImpl implements AuthorService {
     private AuthorRepository authorRepository;
     @Override
     public ResponseEntity<AuthorDetailsDto> updateAuthor(Long id, AuthorDto newAuthorData) {
-        if (!authorRepository.existsByName(newAuthorData.getName())) {
+        if (!duplicationAuthorNameCheck(newAuthorData.getName())) {
             Optional<Author> authorOptional = authorRepository.findById(id);
             if (authorOptional.isPresent() && newAuthorData != null) {
                 Author author = authorOptional.get();
@@ -79,6 +79,10 @@ public class AuthorServiceImpl implements AuthorService {
                 .id(data.getId())
                 .name(data.getName())
                 .build();
+    }
+
+    public boolean duplicationAuthorNameCheck(String authorName) {
+        return authorRepository.existsByName(authorName);
     }
 
 }

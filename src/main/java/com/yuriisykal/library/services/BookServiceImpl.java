@@ -22,9 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -90,7 +88,7 @@ public class BookServiceImpl implements BookService {
     public ResponseEntity<PageResponseDto> findAll(PageDto pageDto) {
         int size = pageDto.getSize() != 0 ? pageDto.getSize() : 10;
         int page = pageDto.getPage();
-        Specification<Book> specification = BookSpec.searchByCriteria(pageDto.getId(), pageDto);
+        Specification<Book> specification = BookSpec.searchByCriteria(pageDto.getAuthorId(), pageDto);
         Page<Book> pages = bookRepository.findAll(specification, PageRequest.of(page, size));
         long totalPages = pages.getTotalPages();
         List<BookShortDto> books = pages.getContent().stream()
@@ -102,7 +100,7 @@ public class BookServiceImpl implements BookService {
     @Override
     public byte[] generateCsvReport(PageDto pageDto) {
 
-        Specification<Book> specification = BookSpec.searchByCriteria(pageDto.getId(), pageDto);
+        Specification<Book> specification = BookSpec.searchByCriteria(pageDto.getAuthorId(), pageDto);
 
         List<Book> books = bookRepository.findAll(specification);
 
@@ -126,7 +124,8 @@ public class BookServiceImpl implements BookService {
         String fileFormat = ".json";
         if (originalFilename != null && originalFilename.contains(fileFormat)) {
             try {
-                filteredBooks = JSONParser.parseJsonFile(file.getBytes());
+                JSONParser jsonParser = new JSONParser();
+                filteredBooks = filterDuplicationByAuthor(jsonParser.parseJsonFile(file.getBytes()));
                 bookRepository.saveAll(filteredBooks.get(ImportResulFilter.SUCCESS));
                 return new ResponseEntity<>(new ImportResultDto(filteredBooks.get(ImportResulFilter.SUCCESS).size(),filteredBooks.get(ImportResulFilter.WRONG).size()), HttpStatus.OK);
             } catch (IOException e) {
@@ -168,6 +167,23 @@ public class BookServiceImpl implements BookService {
 
     private ResponseEntity<UpdatedBookDto> mappingResponseUpdatedBookDto(UpdatedBookDto updatedBookDto) {
         return new ResponseEntity<>(updatedBookDto, HttpStatus.OK);
+    }
+
+    private Map<ImportResulFilter, List<Book>> filterDuplicationByAuthor(Map<ImportResulFilter, List<Book>> map) {
+        List<Book> successBooks = map.get(ImportResulFilter.SUCCESS);
+        List<Book> wrongBooks = map.get(ImportResulFilter.WRONG);
+
+
+        List<Book> failByAuthorBooks = new ArrayList<>();
+        for (Book book : successBooks) {
+            if (book.getAuthor() != null && authorServiceImpl.duplicationAuthorNameCheck(book.getAuthor().getName())) {
+                failByAuthorBooks.add(book);
+            }
+        }
+        successBooks.removeAll(failByAuthorBooks);
+        wrongBooks.addAll(failByAuthorBooks);
+
+        return map;
     }
 
 
