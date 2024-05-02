@@ -56,6 +56,11 @@ public class AuthorServiceImpl implements AuthorService {
         return new ResponseEntity<>(toAuthorDetailsDto(authorRepository.save(author)),HttpStatus.CREATED);
     }
 
+    public Optional<Author> findById(Long id) {
+       return authorRepository.findById(id);
+    }
+
+
     public Author findOrCreateNew(Author author) {
         if (author.getId() != null){
             Optional<Author> personOptional = authorRepository.findById(author.getId());

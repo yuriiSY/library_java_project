@@ -11,6 +11,7 @@ import com.yuriisykal.library.services.specification.BookSpec;
 import com.yuriisykal.library.utils.jsonParser.ImportResulFilter;
 import com.yuriisykal.library.utils.jsonParser.JSONParser;
 import com.yuriisykal.library.utils.validation.Validation;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -124,8 +125,7 @@ public class BookServiceImpl implements BookService {
         String fileFormat = ".json";
         if (originalFilename != null && originalFilename.contains(fileFormat)) {
             try {
-                JSONParser jsonParser = new JSONParser();
-                filteredBooks = filterDuplicationByAuthor(jsonParser.parseJsonFile(file.getBytes()));
+                filteredBooks = filterByAuthor(JSONParser.parseJsonFile(file.getBytes()));
                 bookRepository.saveAll(filteredBooks.get(ImportResulFilter.SUCCESS));
                 return new ResponseEntity<>(new ImportResultDto(filteredBooks.get(ImportResulFilter.SUCCESS).size(),filteredBooks.get(ImportResulFilter.WRONG).size()), HttpStatus.OK);
             } catch (IOException e) {
@@ -169,20 +169,25 @@ public class BookServiceImpl implements BookService {
         return new ResponseEntity<>(updatedBookDto, HttpStatus.OK);
     }
 
-    private Map<ImportResulFilter, List<Book>> filterDuplicationByAuthor(Map<ImportResulFilter, List<Book>> map) {
+
+    private Map<ImportResulFilter, List<Book>> filterByAuthor(Map<ImportResulFilter, List<Book>> map) {
         List<Book> successBooks = map.get(ImportResulFilter.SUCCESS);
         List<Book> wrongBooks = map.get(ImportResulFilter.WRONG);
-
-
         List<Book> failByAuthorBooks = new ArrayList<>();
+
         for (Book book : successBooks) {
-            if (book.getAuthor() != null && authorServiceImpl.duplicationAuthorNameCheck(book.getAuthor().getName())) {
-                failByAuthorBooks.add(book);
+            if (book.getAuthor() != null && book.getAuthor().getId() != null ) {
+                Optional<Author> author = authorServiceImpl.findById(book.getAuthor().getId());
+                if (author.isEmpty()) {
+                    failByAuthorBooks.add(book);
+                } else {
+                    book.setAuthor(author.get());
+                }
             }
         }
+
         successBooks.removeAll(failByAuthorBooks);
         wrongBooks.addAll(failByAuthorBooks);
-
         return map;
     }
 

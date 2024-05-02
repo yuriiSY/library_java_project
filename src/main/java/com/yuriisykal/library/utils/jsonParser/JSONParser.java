@@ -17,7 +17,7 @@ import java.util.Map;
 
 public class JSONParser {
 
-    public Map<ImportResulFilter, List<Book>> parseJsonFile(byte[] fileBytes) throws JsonParseException {
+    public static Map<ImportResulFilter, List<Book>> parseJsonFile(byte[] fileBytes) throws JsonParseException {
         List<Book> successBooks = new ArrayList<>();
         List<Book> wrongBooks = new ArrayList<>();
         Map<ImportResulFilter, List<Book>> filteredBooks = new HashMap<>();
@@ -44,8 +44,10 @@ public class JSONParser {
         return filteredBooks;
     }
 
-    private Book parseBook(JsonParser jsonParser) throws IOException {
+    private static Book parseBook(JsonParser jsonParser) throws IOException {
         Book book = new Book();
+        Author author = new Author();
+
         while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
             String fieldName = jsonParser.getCurrentName();
             if (fieldName == null) {
@@ -68,11 +70,17 @@ public class JSONParser {
                     jsonParser.nextToken();
                     while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
                         String authorFieldName = jsonParser.getCurrentName();
-                        if ("name".equals(authorFieldName)) {
-                            jsonParser.nextToken();
-                            Author author = new Author();
-                            author.setName(jsonParser.getValueAsString());
-                            book.setAuthor(author);
+                        switch (authorFieldName) {
+                            case "id":
+                                jsonParser.nextToken();
+                                author.setId(Long.valueOf(jsonParser.getValueAsString()));
+                                break;
+                            case "name":
+                                jsonParser.nextToken();
+                                author.setName(jsonParser.getValueAsString());
+                                break;
+                            default:
+                                break;
                         }
                     }
                     break;
@@ -80,10 +88,11 @@ public class JSONParser {
                     break;
             }
         }
+        book.setAuthor(author);
         return book;
     }
 
-    private boolean isValidBook(Book book) {
+    private static boolean isValidBook(Book book) {
         return book != null && book.getTitle() != null && !book.getTitle().isEmpty() &&
                 book.getYear_published() > 0 && book.getGenre() != null && !book.getGenre().isEmpty();
     }
