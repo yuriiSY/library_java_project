@@ -1,0 +1,30 @@
+### Expected format for JSON files
+```json
+[
+  {
+    "title": "1984",
+    "year_published": 1949,
+    "genre": "Dystopian",
+    "author": {
+      "id": "1"
+    }
+  },
+  {
+    "title": "Pride and Prejudice",
+    "year_published": 1813,
+    "genre": "Romance",
+    "author": {
+      "id": "500"
+    }
+  },
+  {
+    "title": "Romeo and Juliet",
+    "year_published": 1597,
+    "genre": "Romance",
+    "author": {
+      "id": "1"
+    }
+  }
+]
+
+```
