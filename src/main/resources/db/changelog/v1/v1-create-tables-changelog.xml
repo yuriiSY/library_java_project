@@ -1,0 +1,50 @@
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="v1-1" author="Yurii Sykal">
+        <createTable tableName="author">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(50)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+        <createTable tableName="book">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="title" type="varchar(50)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="year_published" type="integer">
+                <constraints nullable="true"/>
+            </column>
+            <column name="genre" type="varchar(50)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="author_id" type="bigint">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="v1-2" author="Yurii Sykal">
+        <addForeignKeyConstraint baseTableName="book"
+                                 baseColumnNames="author_id"
+                                 constraintName="FK_book_author_id"
+                                 referencedTableName="author"
+                                 referencedColumnNames="id"
+                                 onDelete="SET NULL"/>
+    </changeSet>
+
+    <changeSet id="v1-3" author="Yurii Sykal">
+        <preConditions onFail="MARK_RAN">
+            <tableIsEmpty tableName="author"/>
+        </preConditions>
+
+        <loadData tableName="author" file="db/data/author-data.csv"/>
+    </changeSet>
+
+</databaseChangeLog>
