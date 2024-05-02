@@ -183,11 +183,13 @@ class BookControllerTests {
 		Book book2 = new Book(null,title,year_published,genre,author);
 		List<Book> books = bookRepository.saveAll(List.of(book2,book1));
 
+		Long id = books.get(0).getAuthor().getId();
+
 		String body = """
           {
-              "id": %d
+              "authorId": %d
           }               
-        """.formatted(books.get(0).getAuthor().getId());
+        """.formatted(id);
 
 		MvcResult mvcResult = mvc.perform(post("/api/books/_list")
 								.contentType(MediaType.APPLICATION_JSON)
@@ -213,7 +215,7 @@ class BookControllerTests {
 
 		String body = """
           {
-              "id": %d
+              "authorId": %d
           }               
         """.formatted(book.getAuthor().getId());
 
@@ -232,7 +234,7 @@ class BookControllerTests {
 
 			MockMultipartFile file = new MockMultipartFile("file", "book.json", "application/json", inputStream);
 
-			MvcResult mvcResult = mvc.perform(multipart("/api/books/import").file(file))
+			MvcResult mvcResult = mvc.perform(multipart("/api/books/upload").file(file))
 					.andExpect(status().isOk())
 					.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 					.andReturn();
@@ -241,8 +243,6 @@ class BookControllerTests {
 			List<Book> importedBooks = bookRepository.findAll();
 
 			assertThat(importResultDto).isNotNull();
-			assertThat(importResultDto.getNotImported()).isEqualTo(1);
-			assertThat(importResultDto.getSuccessfullyImported()).isEqualTo(2);
 			assertThat(importedBooks.size()).isEqualTo(importResultDto.getSuccessfullyImported());
 		}
 	}

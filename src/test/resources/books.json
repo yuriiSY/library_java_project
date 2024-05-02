@@ -1,19 +1,26 @@
 [
   {
     "title": "1984",
-    "author": "George Orwell",
     "year_published": 1949,
-    "genre": "Dystopian"
+    "genre": "Dystopian",
+    "author": {
+      "id": "1"
+    }
   },
   {
     "title": "Pride and Prejudice",
-    "author": "Jane Austen",
-    "year_published": 1813
+    "year_published": 1813,
+    "genre": "Romance",
+    "author": {
+      "id": "500"
+    }
   },
   {
     "title": "Romeo and Juliet",
-    "author": "William Shakespeare",
     "year_published": 1597,
-    "genre": "Romance"
+    "genre": "Romance",
+    "author": {
+      "id": "5000"
+    }
   }
 ]

@@ -64,7 +64,7 @@ public class BookController {
 
     }
 
-    @PostMapping("/books/import")
+    @PostMapping("/books/upload")
     public ResponseEntity<ImportResultDto> importEntities(@RequestBody MultipartFile file) {
         return bookServiceImpl.saveDataFromJsonFile(file);
     }
