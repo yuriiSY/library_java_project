@@ -58,7 +58,7 @@ public class BookServiceImpl implements BookService {
         BookShortDto savedBookDto = toBookShortDto(bookRepository.save(book));
         EmailDTO emailDTO = EmailDTO
                 .builder()
-                .recipient("dronika02@gmail.com")
+                .recipient("test@gmail.com")
                 .subject("Test Subject")
                 .text("Test Content")
                 .build();
