@@ -8,6 +8,8 @@
         POSTGRES_DB: library
         POSTGRES_USER: ysykal
         POSTGRES_PASSWORD: password
+      networks:
+        - shared-network
       ports:
         - "5432:5432"
       volumes:
@@ -19,6 +21,8 @@
       environment:
         PGADMIN_DEFAULT_EMAIL: yurasykal@gmail.com
         PGADMIN_DEFAULT_PASSWORD: password
+      networks:
+        - shared-network
       ports:
         - "5050:80"
       depends_on:
@@ -26,3 +30,7 @@
 
   volumes:
     postgres_data:
+
+  networks:
+    shared-network:
+      external: true

@@ -4,6 +4,7 @@ import com.yuriisykal.library.dto.*;
 import com.yuriisykal.library.exeption.invalidFileExeption.InvalidFileException;
 import com.yuriisykal.library.exeption.objectNotExistExeption.ObjectNotExistException;
 import com.yuriisykal.library.exeption.validationExeption.FieldsValidationException;
+import com.yuriisykal.library.message.EmailDTO;
 import com.yuriisykal.library.model.book.Book;
 import com.yuriisykal.library.model.author.Author;
 import com.yuriisykal.library.repositories.BookRepository;
@@ -11,7 +12,6 @@ import com.yuriisykal.library.services.specification.BookSpec;
 import com.yuriisykal.library.utils.jsonParser.ImportResulFilter;
 import com.yuriisykal.library.utils.jsonParser.JSONParser;
 import com.yuriisykal.library.utils.validation.Validation;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,6 +31,7 @@ public class BookServiceImpl implements BookService {
 
     private BookRepository bookRepository;
     private AuthorServiceImpl authorServiceImpl;
+    private KafkaMessageSenderService kafkaMessageSenderService;
     @Override
     public ResponseEntity<DetailsBookDto> getBook(Long id) {
         Optional<Book> optionalBook = bookRepository.findById(id);
@@ -55,6 +56,13 @@ public class BookServiceImpl implements BookService {
             book.setAuthor(author);
         }
         BookShortDto savedBookDto = toBookShortDto(bookRepository.save(book));
+        EmailDTO emailDTO = EmailDTO
+                .builder()
+                .recipient("dronika02@gmail.com")
+                .subject("Test Subject")
+                .text("Test Content")
+                .build();
+        kafkaMessageSenderService.sendMessage(emailDTO);
         return  new ResponseEntity<>(savedBookDto, HttpStatus.CREATED);
     }
 
